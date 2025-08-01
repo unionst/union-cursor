@@ -7,6 +7,7 @@
 
 import SwiftUI
 
+@available(iOS 16, *)
 struct ContentView: View {
     @State var text = ""
     var number = 4
@@ -27,7 +28,7 @@ struct ContentView: View {
     }
 }
 
-
+@available(iOS 16, *)
 struct InputNumber: View {
     var index: Int
     @Binding var text: String
@@ -39,9 +40,8 @@ struct InputNumber: View {
     var numberWhite: Double { darkMode ? 0.65 : 0.5 }
     
     var cursor: some View {
-        Cursor()
-            .fontSize(32)
-            .foregroundColor(Color(red: 0.3, green: 0.76, blue: 0.85))
+        Cursor(size: 32)
+            .tint(Color(red: 0.3, green: 0.76, blue: 0.85))
     }
     var placeholderNumber: some View {
         Text(String(index + 1))
