@@ -8,6 +8,35 @@
 import SwiftUI
 import Combine
 
+/// A **blinking cursor** view that looks and behaves like a real iOS text cursor.
+///
+/// `Cursor` automatically adapts to different iOS versions, using modern async/await animations
+/// on iOS 16+ and legacy Timer-based animations on iOS 13-15. The cursor supports both
+/// blinking and solid states based on typing activity.
+///
+/// ## Example Usage
+///
+/// **Basic cursor:**
+/// ```swift
+/// Cursor()
+/// ```
+///
+/// **Sized cursor with typing state:**
+/// ```swift
+/// Cursor(size: 24, isTyping: false)
+///     .tint(.blue)
+/// ```
+///
+/// **Text field cursor:**
+/// ```swift
+/// HStack {
+///     Text("Hello")
+///     if isEditing {
+///         Cursor(size: 16, isTyping: isTyping)
+///             .tint(.accentColor)
+///     }
+/// }
+/// ```
 @available(iOS 13.0, *)
 public struct Cursor: View {
     private let size: CGFloat
@@ -16,16 +45,49 @@ public struct Cursor: View {
     @State private var on: Bool = true
     @State private var blinkTask: Task<Void, Never>?
 
+    /// Creates a cursor with the specified size and typing state.
+    ///
+    /// Use this initializer for the modern API that supports the `isTyping` parameter
+    /// to control blinking behavior.
+    ///
+    /// - Parameters:
+    ///   - size: The font size the cursor should match, in points. Defaults to 14.0.
+    ///   - isTyping: Whether the cursor should remain solid (true) or blink (false). Defaults to false.
+    ///
+    /// ## Example
+    /// ```swift
+    /// // Standard blinking cursor
+    /// Cursor(size: 18)
+    ///
+    /// // Solid cursor while typing
+    /// Cursor(size: 20, isTyping: true)
+    ///     .tint(.red)
+    /// ```
     public init(size: CGFloat = 14.0, isTyping: Bool = false) {
         self.size = size
         self.isTyping = isTyping
     }
     
+    /// Creates a cursor with default size and blinking enabled.
+    ///
+    /// This is the legacy initializer for backward compatibility. For new code,
+    /// consider using `init(size:isTyping:)` instead.
+    ///
+    /// ## Example
+    /// ```swift
+    /// Cursor()
+    ///     .fontSize(16)
+    ///     .foregroundColor(.blue)
+    /// ```
     public init() {
         self.size = 14.0
         self.isTyping = false
     }
     
+    /// The content and behavior of the cursor view.
+    ///
+    /// This property creates the visual representation of the cursor and handles
+    /// its blinking animations based on the iOS version and typing state.
     public var body: some View {
         ZStack {
             filledRectangle
@@ -140,6 +202,24 @@ public struct Cursor: View {
 
 @available(iOS 13.0, *)
 extension Cursor {
+    /// Modifies the **color** of the cursor.
+    ///
+    /// This method is deprecated on iOS 16+. Use the `.tint()` modifier instead
+    /// for better integration with the system design language.
+    ///
+    /// - Parameter color: The desired cursor color. Pass `nil` to use the default blue color.
+    /// - Returns: A cursor with the modified color.
+    ///
+    /// ## Example
+    /// ```swift
+    /// // Legacy API (deprecated on iOS 16+)
+    /// Cursor()
+    ///     .foregroundColor(.red)
+    ///
+    /// // Modern API (recommended)
+    /// Cursor(size: 16)
+    ///     .tint(.red)
+    /// ```
     @available(iOS, introduced: 13.0, deprecated: 16.0, message: "Use .tint() modifier or Cursor(size:) initializer instead")
     public func foregroundColor(_ color: Color?) -> Cursor {
         var view = self
@@ -147,6 +227,25 @@ extension Cursor {
         return view
     }
     
+    /// Modifies the **font size** that the cursor is expected to fit.
+    ///
+    /// This method is deprecated on iOS 16+. Use the `Cursor(size:)` initializer instead
+    /// for better performance and API consistency.
+    ///
+    /// - Parameter size: The font size to be paired with the cursor, in points.
+    /// - Returns: A cursor with modified size based on expected font size.
+    ///
+    /// ## Example
+    /// ```swift
+    /// // Legacy API (deprecated on iOS 16+)
+    /// Cursor()
+    ///     .fontSize(24)
+    ///     .foregroundColor(.blue)
+    ///
+    /// // Modern API (recommended)
+    /// Cursor(size: 24)
+    ///     .tint(.blue)
+    /// ```
     @available(iOS, introduced: 13.0, deprecated: 16.0, message: "Use Cursor(size:) initializer instead")
     public func fontSize(_ size: CGFloat) -> Cursor {
         return Cursor(size: size, isTyping: self.isTyping)
